@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/popular_movie"
+        android:title="@string/popular"
+        android:orderInCategory="1"
+        app:showAsAction="collapseActionView" />
+    <item
+        android:id="@+id/top_rated_movie"
+        android:title="@string/top_rated"
+        android:orderInCategory="1"
+        app:showAsAction="collapseActionView" />
+</menu>

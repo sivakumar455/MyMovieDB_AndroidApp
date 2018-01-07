@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">MyMovies</string>
+    <string name="poster">Poster</string>
+    <string name="top_rated">TopRated</string>
+    <string name="popular">Popular</string>
+</resources>
