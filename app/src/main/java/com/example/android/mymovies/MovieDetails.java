@@ -53,6 +53,7 @@ class MovieDetails {
             map.put("original_title",original_title);
             map.put("overview",overview);
             map.put("release_date",release_date);
+            map.put("movie_id", String.valueOf(position));
         }catch (Exception e){
             e.printStackTrace();
         }

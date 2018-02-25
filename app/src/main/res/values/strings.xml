@@ -3,4 +3,6 @@
     <string name="poster">Poster</string>
     <string name="top_rated">TopRated</string>
     <string name="popular">Popular</string>
+    <string name="multilines">Mark As\nFavourite</string>
+    <string name="Favourites">My Favourites</string>
 </resources>

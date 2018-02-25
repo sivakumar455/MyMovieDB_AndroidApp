@@ -1,6 +1,8 @@
 package com.example.android.mymovies;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -16,6 +18,8 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -29,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private final String TOP_RATED_KEY = "top_rated";
 
     private static final int MOVIE_FETCH_LOADER = 99;
+
+    private SQLiteDatabase mDb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         dbFetch(TOP_RATED);
         Log.v("TAG1","Afetr initializung");
         //dbFetch(TOP_RATED);
-
+        MoviesDbHelper moviesDbHelper = new MoviesDbHelper(this);
+        mDb = moviesDbHelper.getWritableDatabase();
     }
 
     @Override
@@ -98,7 +105,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoadFinished(Loader<String> loader, final String data) {
 
         Log.v("TAG1","onLoadFinished");
+        finishedJson(data);
+    }
 
+    public void finishedJson (final String data){
         MovieDetails myMovieList = new MovieDetails(data);
         ArrayList<String> myArrList = myMovieList.getMovieList();
         MovieAdapter myMovieAdapter  = new MovieAdapter(getApplicationContext(),myArrList);
@@ -118,6 +128,49 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         });
     }
 
+    public void favList(){
+        MoviesDbHelper moviesDbHelper = new MoviesDbHelper(this);
+        mDb = moviesDbHelper.getReadableDatabase();
+        Cursor cursor = mDb.query(
+                MovieDbContract.MovieDb.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                MovieDbContract.MovieDb.COLUMN_TIMESTAMP
+        );
+
+        ArrayList<String> mArrayList = new ArrayList<String>();
+        //cursor.moveToFirst();
+        while(cursor.moveToNext()) {
+            mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID))); //add the item
+            cursor.moveToNext();
+            //Log.v("TST",cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID)));
+        }
+        Log.v("TST","after cursor");
+        ArrayList<String> arrli = new ArrayList<>();
+        for (int idx=0; idx < mArrayList.size();idx++) {
+            arrli.add("https://image.tmdb.org/t/p/w500/"+mArrayList.get(idx));
+            Log.v("TST",arrli.get(idx));
+        }
+        ArrayList<String> myArrList = arrli;
+        MovieAdapter myMovieAdapter  = new MovieAdapter(getApplicationContext(),myArrList);
+        myMovieGrid = findViewById(R.id.my_movie_grid);
+        myMovieGrid.setAdapter(myMovieAdapter);
+        myMovieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                //Toast.makeText(getApplicationContext(),"Hello",Toast.LENGTH_SHORT).show();
+                /*HashMap<String,String> myMovie;
+                MovieDetails movieDetails = new MovieDetails(data);
+                myMovie = movieDetails.getMyMovie(position);
+                Intent intent = new Intent(getApplicationContext(), MovieIntentActivity.class);
+                intent.putExtra(Intent.EXTRA_TEXT,myMovie);
+                startActivity(intent);*/
+            }
+        });
+    }
     @Override
     public void onLoaderReset(Loader<String> loader) {
 
@@ -198,6 +251,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 String POPULAR = "popular";
                 Log.v("TAG1","Popular");
                 dbFetch(POPULAR);
+                return true;
+            case R.id.favourite_movie:
+                Log.v("TAG1","Favourite");
+                favList();
                 return true;
             default:
                 Toast.makeText(getApplicationContext(),"Default",Toast.LENGTH_SHORT).show();

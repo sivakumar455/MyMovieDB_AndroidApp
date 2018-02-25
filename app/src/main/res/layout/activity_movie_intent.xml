@@ -43,6 +43,14 @@
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
                     android:padding="12dp"/>
+
+                <Button
+                    android:id="@+id/fav_button"
+                    android:theme="@style/AppTheme.Gray"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/multilines" />
+
             </LinearLayout>
         </LinearLayout>
         <TextView
