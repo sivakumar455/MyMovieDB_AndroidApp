@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import org.json.JSONObject;
 
+import java.sql.RowId;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -129,24 +130,34 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     public void favList(){
+
+        ArrayList<String> mArrayList = new ArrayList<>();
+
         MoviesDbHelper moviesDbHelper = new MoviesDbHelper(this);
         mDb = moviesDbHelper.getReadableDatabase();
-        Cursor cursor = mDb.query(
+         Cursor cursor = mDb.query(
                 MovieDbContract.MovieDb.TABLE_NAME,
                 null,
                 null,
                 null,
-                null,
+                MovieDbContract.MovieDb.COLUMN_MOVIE_ID,
                 null,
                 MovieDbContract.MovieDb.COLUMN_TIMESTAMP
         );
 
-        ArrayList<String> mArrayList = new ArrayList<String>();
-        //cursor.moveToFirst();
-        while(cursor.moveToNext()) {
-            mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID))); //add the item
-            cursor.moveToNext();
-            //Log.v("TST",cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID)));
+        try {
+
+            cursor.moveToFirst();
+            while (cursor.moveToNext()) {
+                mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID))); //add the item
+                cursor.moveToNext();
+                //Log.v("TST",cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID)));
+            }
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+            mDb.close();
         }
         Log.v("TST","after cursor");
         ArrayList<String> arrli = new ArrayList<>();
@@ -154,20 +165,48 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             arrli.add("https://image.tmdb.org/t/p/w500/"+mArrayList.get(idx));
             Log.v("TST",arrli.get(idx));
         }
-        ArrayList<String> myArrList = arrli;
-        MovieAdapter myMovieAdapter  = new MovieAdapter(getApplicationContext(),myArrList);
+        MovieAdapter myMovieAdapter  = new MovieAdapter(getApplicationContext(), arrli);
         myMovieGrid = findViewById(R.id.my_movie_grid);
         myMovieGrid.setAdapter(myMovieAdapter);
         myMovieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                //Toast.makeText(getApplicationContext(),"Hello",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Hello fetch fav ",Toast.LENGTH_SHORT).show();
                 /*HashMap<String,String> myMovie;
                 MovieDetails movieDetails = new MovieDetails(data);
                 myMovie = movieDetails.getMyMovie(position);
                 Intent intent = new Intent(getApplicationContext(), MovieIntentActivity.class);
                 intent.putExtra(Intent.EXTRA_TEXT,myMovie);
                 startActivity(intent);*/
+
+                Log.v("HRT","Onclikc Fav");
+
+                MoviesDbHelper moviesDbHelper = new MoviesDbHelper(getApplicationContext());
+                mDb = moviesDbHelper.getReadableDatabase();
+                String query = "SELECT * FROM " + MovieDbContract.MovieDb.TABLE_NAME + " WHERE " + " ROWID " + " = "
+                        + position +" GROUP BY "+ MovieDbContract.MovieDb.COLUMN_MOVIE_ID + " ORDER BY " + MovieDbContract.MovieDb.COLUMN_TIMESTAMP;
+
+                Cursor res = mDb.rawQuery(query, null);
+
+                HashMap<String ,String> map = new HashMap<>();
+                if (res != null ) {
+                    if  (res.moveToFirst()) {
+                        do {
+                            map.put("poster_path",res.getString(res.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID)));
+                            //map.put("vote_average",vote_average);
+                            map.put("original_title",String.valueOf(res.getColumnIndex(MovieDbContract.MovieDb.COLUMN_MOVIE_NAME)));
+                            map.put("overview", String.valueOf(res.getColumnIndex(MovieDbContract.MovieDb.COLUMN_OVERVIEW)));
+                            map.put("release_date", "ABC");//String.valueOf(res.getColumnIndex(MovieDbContract.MovieDb.COLUMN_RELEASE_DATE)));
+                            map.put("movie_id", "ABC");//String.valueOf(res.getColumnIndex(MovieDbContract.MovieDb.COLUMN_MOVIE_ID)));
+                        }while (res.moveToNext());
+                    }
+                }
+                //res.close();
+
+                Intent intent = new Intent(getApplicationContext(), MovieIntentActivity.class);
+                intent.putExtra(Intent.EXTRA_TEXT,map);
+                startActivity(intent);
+
             }
         });
     }

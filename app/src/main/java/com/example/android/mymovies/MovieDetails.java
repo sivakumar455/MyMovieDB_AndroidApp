@@ -46,6 +46,7 @@ class MovieDetails {
             String original_title = newObj.getString("original_title");
             String overview = newObj.getString("overview");
             String release_date = newObj.getString("release_date");
+            String id = newObj.getString("id");
 
             map = new HashMap<>();
             map.put("poster_path",poster_path);
@@ -53,7 +54,7 @@ class MovieDetails {
             map.put("original_title",original_title);
             map.put("overview",overview);
             map.put("release_date",release_date);
-            map.put("movie_id", String.valueOf(position));
+            map.put("movie_id", id);
         }catch (Exception e){
             e.printStackTrace();
         }

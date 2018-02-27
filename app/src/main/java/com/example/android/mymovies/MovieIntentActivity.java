@@ -50,9 +50,11 @@ public class MovieIntentActivity extends AppCompatActivity {
                 mDb = moviesDbHelper.getWritableDatabase();
                 HashMap<String, String> movieDet = (HashMap<String, String>) intentStarted.getSerializableExtra(Intent.EXTRA_TEXT);
                 addFavMovies(movieDet);
+                mDb.close();
                 Log.v("TAG","After INserting ");
             }
         });
+
     }
 
     private long addFavMovies(HashMap<String,String> movieDet){
