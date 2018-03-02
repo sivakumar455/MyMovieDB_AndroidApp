@@ -4,10 +4,12 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -18,10 +20,10 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MovieIntentActivity extends AppCompatActivity {
+public class MovieIntentActivity extends AppCompatActivity{
 
     private SQLiteDatabase mDb;
-
+    ImageButton imgbutton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +38,7 @@ public class MovieIntentActivity extends AppCompatActivity {
         ImageView poster = findViewById(R.id.poster);
         final Intent intentStarted = getIntent();
         Button fav = findViewById(R.id.fav_button);
-        ImageButton imgbutton = findViewById(R.id.tr_button);
+        imgbutton = findViewById(R.id.tr_button);
         final MoviesDbHelper moviesDbHelper = new MoviesDbHelper(getApplicationContext());
 
         if (intentStarted.hasExtra(Intent.EXTRA_TEXT)){
@@ -51,15 +53,14 @@ public class MovieIntentActivity extends AppCompatActivity {
 
             String id = movieDet.get("movie_id");
 
-            Log.v("TR1","before trailer fetching");
-            HttpRequest trReq = new HttpRequest("videos",id);
-            trStr = trReq.getJsonString();
+            MyMovieAsyncTask mytask = new MyMovieAsyncTask();
+            mytask.execute(id);
             //Log.v("TR1",trStr);
-            if(trStr != null){
+            /*if(trStr != null){
                 MovieDetails myTrList = new MovieDetails(trStr);
                 ArrayList<String> myVid = myTrList.getTrailerList();
                 setOnClick(imgbutton, myVid);
-            }
+            }*/
         }
         fav.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,6 +84,26 @@ public class MovieIntentActivity extends AppCompatActivity {
                 Log.i("Video", "Video Playing....");
             }
         });
+    }
+
+
+    private class MyMovieAsyncTask extends AsyncTask<String,Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            HttpRequest trReq = new HttpRequest("videos",strings[0]);
+            return trReq.getJsonString();
+        }
+
+        @Override
+        protected void onPostExecute(final String trStr) {
+            if(trStr != null){
+                MovieDetails myTrList = new MovieDetails(trStr);
+                ArrayList<String> myVid = myTrList.getTrailerList();
+                setOnClick(imgbutton, myVid);
+            }
+            super.onPostExecute(trStr);
+        }
     }
 
     private long addFavMovies(HashMap<String,String> movieDet){
