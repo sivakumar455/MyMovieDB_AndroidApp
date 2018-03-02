@@ -35,6 +35,41 @@ class MovieDetails {
         }
         return arrli;
     }
+
+    public ArrayList<String> getTrailerList(){
+        String id;
+        ArrayList<String> arrli = new ArrayList<>();
+        try {
+            JSONObject objectResults = new JSONObject(jsonMovieObj);
+            JSONArray resultArray = objectResults.getJSONArray("results");
+            for (int idx=0; idx < resultArray.length();idx++) {
+                JSONObject newObj = resultArray.getJSONObject(idx);
+                id = newObj.getString("key");
+                arrli.add("https://www.youtube.com/watch?v="+id);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return arrli;
+    }
+
+    public ArrayList<String> getReviewList(){
+        String id;
+        ArrayList<String> arrli = new ArrayList<>();
+        try {
+            JSONObject objectResults = new JSONObject(jsonMovieObj);
+            JSONArray resultArray = objectResults.getJSONArray("results");
+            for (int idx=0; idx < resultArray.length();idx++) {
+                JSONObject newObj = resultArray.getJSONObject(idx);
+                id = newObj.getString("content");
+                arrli.add(id);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return arrli;
+    }
+
     public HashMap<String,String> getMyMovie(int position){
         HashMap<String ,String> map = null;
         try {

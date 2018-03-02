@@ -18,6 +18,7 @@ import java.net.URL;
 class HttpRequest {
     private final String httpUrl;
     private final String sortOrder;
+    private final String movId;
 
     private final static String MOVIE_BASE_URL =
             "http://api.themoviedb.org/3/movie";
@@ -27,6 +28,13 @@ class HttpRequest {
     public HttpRequest(String sort){
         sortOrder = sort;
         httpUrl = buildUrl();
+        movId = null;
+    }
+
+    public HttpRequest(String sort, String id){
+        sortOrder = sort;
+        movId = id;
+        httpUrl = buildVidReviewUrl(movId);
     }
 
     private String buildUrl() {
@@ -39,11 +47,24 @@ class HttpRequest {
         return uriStr;
     }
 
+    private String buildVidReviewUrl(String id) {
+        Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
+                .appendPath(id)
+                .appendPath(sortOrder)
+                .appendQueryParameter(API_KEY, api_pass)
+                .build();
+        String uriStr = builtUri.toString();
+        Log.v("HTTP check",uriStr);
+        return uriStr;
+    }
+
     public String getJsonString(){
         HttpURLConnection urlConnection = null;
         String res =null;
 
         try {
+
+            Log.v("TR2","check1");
 
             URL url = new URL(httpUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
@@ -60,11 +81,13 @@ class HttpRequest {
         }
         catch (Exception e) {
             e.printStackTrace();
+            Log.v("TR2","chekc2");
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
         }
+        Log.v("TR2","check3");
         return  res;
     }
 }

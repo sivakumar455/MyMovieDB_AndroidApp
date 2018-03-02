@@ -3,26 +3,31 @@ package com.example.android.mymovies;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MovieIntentActivity extends AppCompatActivity {
 
     private SQLiteDatabase mDb;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_intent);
+        String trStr = null;
 
         TextView title = findViewById(R.id.title);
         TextView overview = findViewById(R.id.overview);
@@ -31,6 +36,7 @@ public class MovieIntentActivity extends AppCompatActivity {
         ImageView poster = findViewById(R.id.poster);
         final Intent intentStarted = getIntent();
         Button fav = findViewById(R.id.fav_button);
+        ImageButton imgbutton = findViewById(R.id.tr_button);
         final MoviesDbHelper moviesDbHelper = new MoviesDbHelper(getApplicationContext());
 
         if (intentStarted.hasExtra(Intent.EXTRA_TEXT)){
@@ -38,10 +44,22 @@ public class MovieIntentActivity extends AppCompatActivity {
 
             title.setText(movieDet.get("original_title"));
             movieDet.put("poster","https://image.tmdb.org/t/p/w500/"+movieDet.get("poster_path"));
-            Picasso.with(getApplicationContext()).load(movieDet.get("poster")).into(poster);
+            Picasso.with(getApplicationContext()).load(movieDet.get("poster")).placeholder(R.drawable.ic_launcher_background).into(poster);
             overview.setText(movieDet.get("overview"));
             release_date.setText(movieDet.get("release_date"));
             user_rate.setText(movieDet.get("vote_average"));
+
+            String id = movieDet.get("movie_id");
+
+            Log.v("TR1","before trailer fetching");
+            HttpRequest trReq = new HttpRequest("videos",id);
+            trStr = trReq.getJsonString();
+            //Log.v("TR1",trStr);
+            if(trStr != null){
+                MovieDetails myTrList = new MovieDetails(trStr);
+                ArrayList<String> myVid = myTrList.getTrailerList();
+                setOnClick(imgbutton, myVid);
+            }
         }
         fav.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,6 +73,16 @@ public class MovieIntentActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void setOnClick(final ImageButton imgbutton, final ArrayList<String> myVid){
+        imgbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(myVid.get(0))));
+                Log.i("Video", "Video Playing....");
+            }
+        });
     }
 
     private long addFavMovies(HashMap<String,String> movieDet){
