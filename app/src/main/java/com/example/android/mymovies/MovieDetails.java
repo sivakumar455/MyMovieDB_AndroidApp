@@ -90,6 +90,7 @@ class MovieDetails {
             map.put("overview",overview);
             map.put("release_date",release_date);
             map.put("movie_id", id);
+            map.put("vote_average",vote_average);
         }catch (Exception e){
             e.printStackTrace();
         }

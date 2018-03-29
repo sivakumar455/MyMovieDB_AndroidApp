@@ -4,8 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import java.sql.SQLClientInfoException;
-
 /**
  * Created by SIPADALA on 2/25/2018.
  */
@@ -28,6 +26,7 @@ public class MoviesDbHelper extends SQLiteOpenHelper{
                 MovieDbContract.MovieDb.COLUMN_POSTER_ID + " TEXT NOT NULL, " +
                 MovieDbContract.MovieDb.COLUMN_OVERVIEW + " TEXT NOT NULL, " +
                 MovieDbContract.MovieDb.COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +
+                MovieDbContract.MovieDb.COLUMN_VOTE_AVG + " TEXT, " +
                 MovieDbContract.MovieDb.COLUMN_TIMESTAMP + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 "); ";
         sqLiteDatabase.execSQL(SQL_CREATE_WAITLIST_TABLE);

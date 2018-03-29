@@ -41,7 +41,44 @@ public class MovieContentProvider extends ContentProvider{
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] strings, @Nullable String s, @Nullable String[] strings1, @Nullable String s1) {
 
-        return null;
+        final SQLiteDatabase db = moviesDbHelper.getReadableDatabase();
+        int match = sUriMatcher.match(uri);
+
+        Cursor retCursor;
+        switch (match){
+            case TASKS:
+                retCursor = db.query(MovieDbContract.MovieDb.TABLE_NAME,
+                        strings,
+                        s,
+                        strings1,
+                        null,
+                        null,
+                        s1);
+                break;
+            case TASK_WITH_ID:
+                // Get the id from the URI
+                String id = uri.getPathSegments().get(1);
+
+                // Selection is the _ID column = ?, and the Selection args = the row ID from the URI
+                String mSelection = "_id=?";
+                String[] mSelectionArgs = new String[]{id};
+
+                // Construct a query as you would normally, passing in the selection/args
+                retCursor =  db.query(MovieDbContract.MovieDb.TABLE_NAME,
+                        strings,
+                        mSelection,
+                        mSelectionArgs,
+                        null,
+                        null,
+                        s1);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported  query "+ uri);
+        }
+
+        retCursor.setNotificationUri(getContext().getContentResolver(),uri);
+        //return null;
+        return retCursor;
     }
 
     @Nullable
@@ -78,7 +115,24 @@ public class MovieContentProvider extends ContentProvider{
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+
+        final SQLiteDatabase db = moviesDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+        String id = uri.getPathSegments().get(1);
+        String mWhere = "_id=?";
+        String[] mWhereArgs = new String[]{id};
+
+        int res=0;
+        switch (match){
+            case TASK_WITH_ID:
+                res = db.delete(MovieDbContract.MovieDb.TABLE_NAME,mWhere,mWhereArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported delete"+ uri);
+        }
+        //return null;
+        getContext().getContentResolver().notifyChange(uri,null);
+        return res;
     }
 
     @Override

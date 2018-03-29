@@ -10,8 +10,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +23,9 @@ import java.util.HashMap;
 public class MovieIntentActivity extends AppCompatActivity{
 
     private SQLiteDatabase mDb;
-    ImageButton imgbutton;
+    //ImageButton imgbutton;
+    TextView txtView;
+    LinearLayout rootView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +40,16 @@ public class MovieIntentActivity extends AppCompatActivity{
         ImageView poster = findViewById(R.id.poster);
         final Intent intentStarted = getIntent();
         Button fav = findViewById(R.id.fav_button);
-        imgbutton = findViewById(R.id.tr_button);
+        rootView = findViewById(R.id.main_view);
+
+        txtView = new TextView(getApplicationContext());
+        txtView.setText("Trailers :");
+        txtView.setTextSize(24);
+        txtView.setPadding(12,5,0,0);
+        txtView.setTextColor(getResources().getColor(R.color.colorGreen));
+        rootView.addView(txtView);
+
+        //txtBtn = findViewById(R.id.tr_button);
         final MoviesDbHelper moviesDbHelper = new MoviesDbHelper(getApplicationContext());
 
         if (intentStarted.hasExtra(Intent.EXTRA_TEXT)){
@@ -54,7 +65,10 @@ public class MovieIntentActivity extends AppCompatActivity{
             String id = movieDet.get("movie_id");
 
             MyMovieAsyncTask mytask = new MyMovieAsyncTask();
-            mytask.execute(id);
+            mytask.execute("videos",id);
+
+            ReviewAsyncTask myReview = new ReviewAsyncTask();
+            myReview.execute("reviews",id);
             //Log.v("TR1",trStr);
             /*if(trStr != null){
                 MovieDetails myTrList = new MovieDetails(trStr);
@@ -76,11 +90,11 @@ public class MovieIntentActivity extends AppCompatActivity{
 
     }
 
-    private void setOnClick(final ImageButton imgbutton, final ArrayList<String> myVid){
+    private void setOnClick(final TextView imgbutton, final String myVid){
         imgbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(myVid.get(0))));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(myVid)));
                 Log.i("Video", "Video Playing....");
             }
         });
@@ -91,7 +105,7 @@ public class MovieIntentActivity extends AppCompatActivity{
 
         @Override
         protected String doInBackground(String... strings) {
-            HttpRequest trReq = new HttpRequest("videos",strings[0]);
+            HttpRequest trReq = new HttpRequest(strings[0],strings[1]);
             return trReq.getJsonString();
         }
 
@@ -100,7 +114,51 @@ public class MovieIntentActivity extends AppCompatActivity{
             if(trStr != null){
                 MovieDetails myTrList = new MovieDetails(trStr);
                 ArrayList<String> myVid = myTrList.getTrailerList();
-                setOnClick(imgbutton, myVid);
+
+                for(int idx =0; idx< myVid.size();idx++) {
+                    txtView = new TextView(getApplicationContext());
+                    int res = idx+1;
+                    txtView.setText("Trailer "+res);
+                    txtView.setTextSize(20);
+                    txtView.setPadding(50,5,0,0);
+                    rootView.addView(txtView);
+                    setOnClick(txtView, myVid.get(idx));
+                }
+            }
+            super.onPostExecute(trStr);
+        }
+    }
+
+
+    private class ReviewAsyncTask extends AsyncTask<String,Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            HttpRequest trReq = new HttpRequest(strings[0],strings[1]);
+            return trReq.getJsonString();
+        }
+
+        @Override
+        protected void onPostExecute(final String trStr) {
+            if(trStr != null){
+                MovieDetails myReviewList = new MovieDetails(trStr);
+                ArrayList<String> myVid = myReviewList.getReviewList();
+
+                txtView = new TextView(getApplicationContext());
+                txtView.setText("Reviews :");
+                txtView.setTextSize(24);
+                txtView.setPadding(12,5,0,0);
+                txtView.setTextColor(getResources().getColor(R.color.colorGreen));
+                rootView.addView(txtView);
+
+                for(int idx =0; idx< myVid.size();idx++) {
+                    txtView = new TextView(getApplicationContext());
+                    txtView.setText(myVid.get(idx));
+                    txtView.setTextSize(16);
+                    txtView.setPadding(24,5,0,0);
+                    rootView.addView(txtView);
+                    //setOnClick(txtView, myVid.get(idx));
+                }
             }
             super.onPostExecute(trStr);
         }
@@ -113,12 +171,13 @@ public class MovieIntentActivity extends AppCompatActivity{
         cv.put(MovieDbContract.MovieDb.COLUMN_POSTER_ID,movieDet.get("poster_path"));
         cv.put(MovieDbContract.MovieDb.COLUMN_OVERVIEW,movieDet.get("overview"));
         cv.put(MovieDbContract.MovieDb.COLUMN_RELEASE_DATE,movieDet.get("release_date"));
+        cv.put(MovieDbContract.MovieDb.COLUMN_VOTE_AVG,movieDet.get("vote_average"));
         //return mDb.insert(MovieDbContract.MovieDb.TABLE_NAME, null, cv);
+
         Uri uri = getContentResolver().insert(MovieDbContract.MovieDb.CONTENT_URI,cv);
         if(uri != null){
             Toast.makeText(this,uri.toString(),Toast.LENGTH_SHORT).show();
         }
         finish();
     }
-
 }

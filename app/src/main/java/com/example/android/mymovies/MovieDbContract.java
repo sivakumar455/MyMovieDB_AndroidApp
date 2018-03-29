@@ -26,5 +26,6 @@ public class MovieDbContract {
         public static final String COLUMN_OVERVIEW = "overview";
         public static final String COLUMN_RELEASE_DATE = "releasedate";
         public static final String COLUMN_TIMESTAMP = "timestamp";
+        public static final String COLUMN_VOTE_AVG = "VoteAvg";
     }
 }
