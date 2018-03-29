@@ -19,12 +19,12 @@ import android.support.annotation.Nullable;
 
 public class MovieContentProvider extends ContentProvider{
 
-    public static final int TASKS = 100;
-    public static final int TASK_WITH_ID = 101;
+    private static final int TASKS = 100;
+    private static final int TASK_WITH_ID = 101;
 
-    public static final UriMatcher sUriMatcher = buildUriMatcher();
+    private static final UriMatcher sUriMatcher = buildUriMatcher();
 
-    public static UriMatcher buildUriMatcher(){
+    private static UriMatcher buildUriMatcher(){
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(MovieDbContract.AUTHORITY,MovieDbContract.PATH_TASKS,TASKS);
         uriMatcher.addURI(MovieDbContract.AUTHORITY,MovieDbContract.PATH_TASKS+"/#",TASK_WITH_ID);
@@ -79,7 +79,6 @@ public class MovieContentProvider extends ContentProvider{
         }
 
         retCursor.setNotificationUri(getContext().getContentResolver(),uri);
-        //return null;
         return retCursor;
     }
 
@@ -110,7 +109,6 @@ public class MovieContentProvider extends ContentProvider{
             default:
                 throw new UnsupportedOperationException("Default query in Insert "+ uri);
         }
-        //return null;
         getContext().getContentResolver().notifyChange(uri,null);
         return  retrunUri;
     }
@@ -124,7 +122,7 @@ public class MovieContentProvider extends ContentProvider{
         String mWhere = "_id=?";
         String[] mWhereArgs = new String[]{id};
 
-        int res=0;
+        int res;
         switch (match){
             case TASK_WITH_ID:
                 res = db.delete(MovieDbContract.MovieDb.TABLE_NAME,mWhere,mWhereArgs);
@@ -132,7 +130,6 @@ public class MovieContentProvider extends ContentProvider{
             default:
                 throw new UnsupportedOperationException("Unsupported delete"+ uri);
         }
-        //return null;
         getContext().getContentResolver().notifyChange(uri,null);
         return res;
     }

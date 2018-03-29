@@ -99,7 +99,7 @@ import java.util.HashMap;
             finishedJson(data);
         }
 
-        public void finishedJson (final String data){
+        private void finishedJson(final String data){
             MovieDetails myMovieList = new MovieDetails(data);
             ArrayList<String> myArrList = myMovieList.getMovieList();
             MovieAdapter myMovieAdapter  = new MovieAdapter(getApplicationContext(),myArrList);
@@ -119,7 +119,7 @@ import java.util.HashMap;
             });
         }
 
-        public void favList(){
+        private void favList(){
 
             ArrayList<String> mArrayList = new ArrayList<>();
 
@@ -132,12 +132,15 @@ import java.util.HashMap;
                          null,
                          null,
                          MovieDbContract.MovieDb._ID );
-                 cursor.moveToFirst();
-                 mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID)));
-                 //DatabaseUtils.dumpCursor(cursor);
-                 while (cursor.moveToNext()) {
-                     mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID))); //add the item
-                     Log.v("28",cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb._ID)));
+                 if(cursor != null) {
+                     cursor.moveToFirst();
+                     mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID)));
+                     //DatabaseUtils.dumpCursor(cursor);
+                     while (cursor.moveToNext()) {
+                         mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID))); //add the item
+                         Log.v("28", cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb._ID)));
+                     }
+                     cursor.close();
                  }
              }
              catch (Exception e){
@@ -162,7 +165,9 @@ import java.util.HashMap;
                     String query = "SELECT * FROM " + MovieDbContract.MovieDb.TABLE_NAME + " WHERE " + " ROWID " + " = "
                             + pos +" GROUP BY "+ MovieDbContract.MovieDb.COLUMN_MOVIE_ID + " ORDER BY " + MovieDbContract.MovieDb.COLUMN_TIMESTAMP;
 
+
                     Cursor res = mDb.rawQuery(query, null);
+
                     //DatabaseUtils.dumpCursor(res);
                     HashMap<String ,String> map = new HashMap<>();
                     if (res != null ) {
@@ -176,7 +181,9 @@ import java.util.HashMap;
                                 map.put("vote_average", res.getString(res.getColumnIndex(MovieDbContract.MovieDb.COLUMN_VOTE_AVG)));
                             }while (res.moveToNext());
                         }
+                        res.close();
                     }
+
                     //Log.v("MainActivity", String.valueOf(Arrays.asList(map)));
                     Intent intent = new Intent(getApplicationContext(), MovieIntentActivity.class);
                     intent.putExtra(Intent.EXTRA_TEXT,map);

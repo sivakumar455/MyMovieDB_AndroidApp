@@ -31,8 +31,8 @@ import java.util.HashMap;
 public class MovieIntentActivity extends AppCompatActivity{
 
     private SQLiteDatabase mDb;
-    TextView txtView;
-    LinearLayout rootView;
+    private TextView txtView;
+    private LinearLayout rootView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +50,7 @@ public class MovieIntentActivity extends AppCompatActivity{
         rootView = findViewById(R.id.main_view);
 
         txtView = new TextView(getApplicationContext());
-        txtView.setText("Trailers :");
+        txtView.setText(getResources().getString(R.string.Trailers));
         txtView.setTextSize(24);
         txtView.setPadding(12,5,0,0);
         txtView.setTextColor(getResources().getColor(R.color.colorGreen));
@@ -110,7 +110,7 @@ public class MovieIntentActivity extends AppCompatActivity{
                 for(int idx =0; idx< myVid.size();idx++) {
                     txtView = new TextView(getApplicationContext());
                     int res = idx+1;
-                    txtView.setText("Trailer "+res);
+                    txtView.setText(String.format("%s%d", getResources().getString(R.string.Trailer), res));
                     txtView.setTextSize(20);
                     txtView.setPadding(50,5,0,0);
                     rootView.addView(txtView);
@@ -137,7 +137,7 @@ public class MovieIntentActivity extends AppCompatActivity{
                 ArrayList<String> myVid = myReviewList.getReviewList();
 
                 txtView = new TextView(getApplicationContext());
-                txtView.setText("Reviews :");
+                txtView.setText(getResources().getString(R.string.Reviews));
                 txtView.setTextSize(24);
                 txtView.setPadding(12,5,0,0);
                 txtView.setTextColor(getResources().getColor(R.color.colorGreen));
@@ -191,9 +191,6 @@ public class MovieIntentActivity extends AppCompatActivity{
         //Log.v("MovieIntentActivity", movieDet.get("movie_id"));
         if(! mArrayList.contains(movieDet.get("movie_id"))) {
             Uri uri = getContentResolver().insert(MovieDbContract.MovieDb.CONTENT_URI, cv);
-            if (uri != null) {
-                Toast.makeText(this, uri.toString(), Toast.LENGTH_SHORT).show();
-            }
             finish();
         }else {
             Toast.makeText(this,"Already added ",Toast.LENGTH_SHORT).show();

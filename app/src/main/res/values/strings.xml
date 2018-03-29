@@ -5,4 +5,7 @@
     <string name="popular">Popular</string>
     <string name="multilines">Mark As\nFavourite</string>
     <string name="Favourites">My Favourites</string>
+    <string name="Trailer">Trailer </string>
+    <string name="Reviews">Reviews :</string>
+    <string name="Trailers">Trailers :</string>
 </resources>

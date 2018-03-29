@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * @since   29/03/18
  */
 
-public class MoviesDbHelper extends SQLiteOpenHelper{
+class MoviesDbHelper extends SQLiteOpenHelper{
 
     private static final String DATABASE_NAME = "mymovies.db";
     private static final int DATABASE_VERSION = 1;
