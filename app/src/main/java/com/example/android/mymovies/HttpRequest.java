@@ -63,9 +63,6 @@ class HttpRequest {
         String res =null;
 
         try {
-
-            Log.v("TR2","check1");
-
             URL url = new URL(httpUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
 
@@ -81,13 +78,11 @@ class HttpRequest {
         }
         catch (Exception e) {
             e.printStackTrace();
-            Log.v("TR2","chekc2");
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
         }
-        Log.v("TR2","check3");
         return  res;
     }
 }

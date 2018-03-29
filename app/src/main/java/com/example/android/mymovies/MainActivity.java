@@ -2,7 +2,6 @@ package com.example.android.mymovies;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -19,8 +18,12 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+/**
+ * @author  Siva Kumar Padala
+ * @version 1.0
+ * @since   29/03/18
+ */
 
     public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
@@ -37,16 +40,7 @@ import java.util.HashMap;
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
 
-
-            /*MyMovieAsyncTask myStr = new MyMovieAsyncTask();
-            myStr.execute(TOP_RATED);*/
-
-            Log.v("TAG1","Before initializung");
-
-            //getSupportLoaderManager().initLoader(MOVIE_FETCH_LOADER, null, this);
             dbFetch(TOP_RATED);
-            Log.v("TAG1","Afetr initializung");
-            //dbFetch(TOP_RATED);
             MoviesDbHelper moviesDbHelper = new MoviesDbHelper(this);
             mDb = moviesDbHelper.getWritableDatabase();
         }
@@ -58,10 +52,10 @@ import java.util.HashMap;
                 String jsonRes;
                 @Override
                 protected void onStartLoading() {
-                    Log.v("TAG1","onStartLoading");
+                    Log.v("MainActivity","onStartLoading");
                     if (args == null)
                     {
-                        Log.v("TAG1","onStartLoading is null");
+                        Log.v("MainActivity","onStartLoading is null");
                         return;
                     }
                     if (jsonRes != null) {
@@ -69,19 +63,19 @@ import java.util.HashMap;
                     } else {
                         forceLoad();
                     }
-                    Log.v("TAG1",args.getString(TOP_RATED_KEY));
+                    Log.v("MainActivity",args.getString(TOP_RATED_KEY));
 
                 }
 
                 @Override
                 public String loadInBackground() {
-                    Log.v("TAG1","loadInBackground");
+                    Log.v("MainActivity","loadInBackground");
                     String myRating = args.getString(TOP_RATED_KEY);
                     if(myRating == null || TextUtils.isEmpty(myRating)){
                         return null;
                     }
                     try {
-                        Log.v("TAG1","loadInBackground try ");
+                        Log.v("MainActivity","loadInBackground try ");
                         HttpRequest myMovieReq = new HttpRequest(myRating);
                         return myMovieReq.getJsonString();
                     }catch (Exception e){
@@ -101,7 +95,7 @@ import java.util.HashMap;
         @Override
         public void onLoadFinished(Loader<String> loader, final String data) {
 
-            Log.v("TAG1","onLoadFinished");
+            Log.v("MainActivity","onLoadFinished");
             finishedJson(data);
         }
 
@@ -140,40 +134,19 @@ import java.util.HashMap;
                          MovieDbContract.MovieDb._ID );
                  cursor.moveToFirst();
                  mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID)));
-
-                 Log.v("28",cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb._ID)));
-                 Log.v("28", String.valueOf(cursor.getCount()));
                  //DatabaseUtils.dumpCursor(cursor);
-
                  while (cursor.moveToNext()) {
                      mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID))); //add the item
                      Log.v("28",cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb._ID)));
-                     //cursor.moveToNext();
                  }
              }
              catch (Exception e){
                  e.printStackTrace();
              }
 
-            /*try {
-
-                cursor.moveToFirst();
-                while (cursor.moveToNext()) {
-                    mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID))); //add the item
-                    cursor.moveToNext();
-                    //Log.v("TST",cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID)));
-                }
-            } finally {
-                if (cursor != null && !cursor.isClosed()) {
-                    cursor.close();
-                }
-                mDb.close();
-            }*/
-            Log.v("TST","after cursor");
             ArrayList<String> arrli = new ArrayList<>();
             for (int idx=0; idx < mArrayList.size();idx++) {
                 arrli.add("https://image.tmdb.org/t/p/w500/"+mArrayList.get(idx));
-                Log.v("TST",arrli.get(idx));
             }
             MovieAdapter myMovieAdapter  = new MovieAdapter(getApplicationContext(), arrli);
             myMovieGrid = findViewById(R.id.my_movie_grid);
@@ -181,33 +154,21 @@ import java.util.HashMap;
             myMovieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                    Toast.makeText(getApplicationContext(),"Hello fetch fav ",Toast.LENGTH_SHORT).show();
-                    /*HashMap<String,String> myMovie;
-                    MovieDetails movieDetails = new MovieDetails(data);
-                    myMovie = movieDetails.getMyMovie(position);
-                    Intent intent = new Intent(getApplicationContext(), MovieIntentActivity.class);
-                    intent.putExtra(Intent.EXTRA_TEXT,myMovie);
-                    startActivity(intent);*/
-
-                    Log.v("HRT","Onclikc Fav");
+                    //Toast.makeText(getApplicationContext(),"Hello fetch fav ",Toast.LENGTH_SHORT).show();
 
                     MoviesDbHelper moviesDbHelper = new MoviesDbHelper(getApplicationContext());
                     mDb = moviesDbHelper.getReadableDatabase();
                     int pos = position+1;
-                    Log.v("28",String.valueOf(pos));
                     String query = "SELECT * FROM " + MovieDbContract.MovieDb.TABLE_NAME + " WHERE " + " ROWID " + " = "
                             + pos +" GROUP BY "+ MovieDbContract.MovieDb.COLUMN_MOVIE_ID + " ORDER BY " + MovieDbContract.MovieDb.COLUMN_TIMESTAMP;
 
                     Cursor res = mDb.rawQuery(query, null);
-
-                    DatabaseUtils.dumpCursor(res);
-
+                    //DatabaseUtils.dumpCursor(res);
                     HashMap<String ,String> map = new HashMap<>();
                     if (res != null ) {
                         if  (res.moveToFirst()) {
                             do {
                                 map.put("poster_path",res.getString(res.getColumnIndex(MovieDbContract.MovieDb.COLUMN_POSTER_ID)));
-                                //map.put("vote_average",vote_average);
                                 map.put("original_title",res.getString(res.getColumnIndex(MovieDbContract.MovieDb.COLUMN_MOVIE_NAME)));
                                 map.put("overview", res.getString(res.getColumnIndex(MovieDbContract.MovieDb.COLUMN_OVERVIEW)));
                                 map.put("release_date", res.getString(res.getColumnIndex(MovieDbContract.MovieDb.COLUMN_RELEASE_DATE)));
@@ -216,14 +177,10 @@ import java.util.HashMap;
                             }while (res.moveToNext());
                         }
                     }
-                    //res.close();
-
-                    Log.v("28", String.valueOf(Arrays.asList(map)));
-
+                    //Log.v("MainActivity", String.valueOf(Arrays.asList(map)));
                     Intent intent = new Intent(getApplicationContext(), MovieIntentActivity.class);
                     intent.putExtra(Intent.EXTRA_TEXT,map);
                     startActivity(intent);
-
                 }
             });
         }
@@ -233,48 +190,14 @@ import java.util.HashMap;
 
         }
 
-
-       /* private class MyMovieAsyncTask extends AsyncTask<String,Void, String>{
-            @Override
-            protected String doInBackground(String... strings) {
-                HttpRequest myMovieReq = new HttpRequest(strings[0]);
-                return myMovieReq.getJsonString();
-            }
-
-            @Override
-            protected void onPostExecute(final String str) {
-
-                MovieDetails myMovieList = new MovieDetails(str);
-                ArrayList<String> myArrList = myMovieList.getMovieList();
-                MovieAdapter myMovieAdapter  = new MovieAdapter(getApplicationContext(),myArrList);
-                myMovieGrid = findViewById(R.id.my_movie_grid);
-                myMovieGrid.setAdapter(myMovieAdapter);
-                myMovieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                        //Toast.makeText(getApplicationContext(),"Hello",Toast.LENGTH_SHORT).show();
-                        HashMap<String,String> myMovie;
-                        MovieDetails movieDetails = new MovieDetails(str);
-                        myMovie = movieDetails.getMyMovie(position);
-                        Intent intent = new Intent(getApplicationContext(), MovieIntentActivity.class);
-                        intent.putExtra(Intent.EXTRA_TEXT,myMovie);
-                        startActivity(intent);
-                    }
-                });
-                super.onPostExecute(str);
-            }
-        }*/
-
         @Override
         public boolean onCreateOptionsMenu(Menu menu) {
             getMenuInflater().inflate(R.menu.main,menu);
-            //return super.onCreateOptionsMenu(menu);
             return true;
         }
 
         private void dbFetch(String order){
 
-            Log.v("TAG1","IN dbFetch");
             Bundle myBundle = new Bundle();
             myBundle.putString(TOP_RATED_KEY,order);
 
@@ -282,10 +205,10 @@ import java.util.HashMap;
             Loader<String> movieDbLoader = loaderManager.getLoader(MOVIE_FETCH_LOADER);
 
             if (movieDbLoader == null) {
-                Log.v("TAG1","loader is null");
+                Log.v("MainActivity","loader is null");
                 loaderManager.initLoader(MOVIE_FETCH_LOADER, myBundle, this);
             } else {
-                Log.v("TAG1","loader noit null");
+                Log.v("MainActivity","loader not null");
                 loaderManager.restartLoader(MOVIE_FETCH_LOADER, myBundle, this);
             }
 
@@ -294,24 +217,19 @@ import java.util.HashMap;
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             myMovieGrid = findViewById(R.id.my_movie_grid);
-            Log.v("TAG1","Before on Opytions");
-            //dbFetch(TOP_RATED);
-            Log.v("TAG1","After on Opt");
-
             switch(item.getItemId()){
                 case R.id.top_rated_movie:
                     //Toast.makeText(getApplicationContext(),"Top Rated",Toast.LENGTH_SHORT).show();
-                    Log.v("TAG1","Top rated");
                     dbFetch(TOP_RATED);
                     return true;
                 case  R.id.popular_movie:
                     //Toast.makeText(getApplicationContext(),"Popular",Toast.LENGTH_SHORT).show();
                     String POPULAR = "popular";
-                    Log.v("TAG1","Popular");
+                    Log.v("MainActivity","Popular");
                     dbFetch(POPULAR);
                     return true;
                 case R.id.favourite_movie:
-                    Log.v("TAG1","Favourite");
+                    Log.v("MainActivity","Favourite");
                     favList();
                     return true;
                 default:
@@ -319,10 +237,4 @@ import java.util.HashMap;
             }
             return super.onOptionsItemSelected(item);
         }
-
-        /*@Override
-        protected void onResume() {
-            super.onResume();
-            getSupportLoaderManager().restartLoader(MOVIE_FETCH_LOADER,null,this);
-        }*/
     }

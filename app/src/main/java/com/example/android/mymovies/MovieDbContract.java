@@ -4,7 +4,9 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
- * Created by SIPADALA on 2/25/2018.
+ * @author  Siva Kumar Padala
+ * @version 1.0
+ * @since   29/03/18
  */
 
 public class MovieDbContract {

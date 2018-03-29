@@ -53,7 +53,7 @@ class MovieAdapter extends BaseAdapter{
             imgView = (ImageView) convertView;
         }
 
-        Picasso.with(mContext).load(mArrayMovieList.get(position)).into(imgView);
+        Picasso.with(mContext).load(mArrayMovieList.get(position)).placeholder(R.drawable.ic_launcher_background).into(imgView);
         return imgView;
     }
 }

@@ -12,7 +12,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
- * Created by sivakumarpadala on 28/03/18.
+ * @author  Siva Kumar Padala
+ * @version 1.0
+ * @since   29/03/18
  */
 
 public class MovieContentProvider extends ContentProvider{
@@ -106,7 +108,7 @@ public class MovieContentProvider extends ContentProvider{
 
                 break;
             default:
-                throw new UnsupportedOperationException("Unsuported "+ uri);
+                throw new UnsupportedOperationException("Default query in Insert "+ uri);
         }
         //return null;
         getContext().getContentResolver().notifyChange(uri,null);

@@ -2,6 +2,8 @@ package com.example.android.mymovies;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -20,10 +22,15 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * @author  Siva Kumar Padala
+ * @version 1.0
+ * @since   29/03/18
+ */
+
 public class MovieIntentActivity extends AppCompatActivity{
 
     private SQLiteDatabase mDb;
-    //ImageButton imgbutton;
     TextView txtView;
     LinearLayout rootView;
 
@@ -48,10 +55,7 @@ public class MovieIntentActivity extends AppCompatActivity{
         txtView.setPadding(12,5,0,0);
         txtView.setTextColor(getResources().getColor(R.color.colorGreen));
         rootView.addView(txtView);
-
-        //txtBtn = findViewById(R.id.tr_button);
         final MoviesDbHelper moviesDbHelper = new MoviesDbHelper(getApplicationContext());
-
         if (intentStarted.hasExtra(Intent.EXTRA_TEXT)){
             HashMap<String,String> movieDet = (HashMap<String, String>) intentStarted.getSerializableExtra(Intent.EXTRA_TEXT);
 
@@ -63,31 +67,19 @@ public class MovieIntentActivity extends AppCompatActivity{
             user_rate.setText(movieDet.get("vote_average"));
 
             String id = movieDet.get("movie_id");
-
             MyMovieAsyncTask mytask = new MyMovieAsyncTask();
             mytask.execute("videos",id);
-
             ReviewAsyncTask myReview = new ReviewAsyncTask();
             myReview.execute("reviews",id);
-            //Log.v("TR1",trStr);
-            /*if(trStr != null){
-                MovieDetails myTrList = new MovieDetails(trStr);
-                ArrayList<String> myVid = myTrList.getTrailerList();
-                setOnClick(imgbutton, myVid);
-            }*/
         }
         fav.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.v("TAG","INserting ");
-                //mDb = moviesDbHelper.getWritableDatabase();
+                Log.v("MovieIntentActivity","Inserting ");
                 HashMap<String, String> movieDet = (HashMap<String, String>) intentStarted.getSerializableExtra(Intent.EXTRA_TEXT);
                 addFavMovies(movieDet);
-                //mDb.close();
-                Log.v("TAG","After INserting ");
             }
         });
-
     }
 
     private void setOnClick(final TextView imgbutton, final String myVid){
@@ -95,7 +87,7 @@ public class MovieIntentActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(myVid)));
-                Log.i("Video", "Video Playing....");
+                Log.v("MovieIntentActivity", "Video Playing....");
             }
         });
     }
@@ -174,10 +166,37 @@ public class MovieIntentActivity extends AppCompatActivity{
         cv.put(MovieDbContract.MovieDb.COLUMN_VOTE_AVG,movieDet.get("vote_average"));
         //return mDb.insert(MovieDbContract.MovieDb.TABLE_NAME, null, cv);
 
-        Uri uri = getContentResolver().insert(MovieDbContract.MovieDb.CONTENT_URI,cv);
-        if(uri != null){
-            Toast.makeText(this,uri.toString(),Toast.LENGTH_SHORT).show();
+        ArrayList<String> mArrayList = new ArrayList<>();
+        MoviesDbHelper moviesDbHelper = new MoviesDbHelper(this);
+        mDb = moviesDbHelper.getReadableDatabase();
+        try {
+
+            Cursor cursor = getContentResolver().query(MovieDbContract.MovieDb.CONTENT_URI,
+                    null,
+                    null,
+                    null,
+                    MovieDbContract.MovieDb._ID);
+            cursor.moveToFirst();
+            mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_MOVIE_ID)));
+            //Log.v("MovieIntentActivity", String.valueOf(cursor.getCount()));
+            DatabaseUtils.dumpCursor(cursor);
+            while (cursor.moveToNext()) {
+                mArrayList.add(cursor.getString(cursor.getColumnIndex(MovieDbContract.MovieDb.COLUMN_MOVIE_ID)));
+            }
+            //Log.v("MovieIntentActivity", String.valueOf(Arrays.asList(mArrayList)));
         }
-        finish();
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        //Log.v("MovieIntentActivity", movieDet.get("movie_id"));
+        if(! mArrayList.contains(movieDet.get("movie_id"))) {
+            Uri uri = getContentResolver().insert(MovieDbContract.MovieDb.CONTENT_URI, cv);
+            if (uri != null) {
+                Toast.makeText(this, uri.toString(), Toast.LENGTH_SHORT).show();
+            }
+            finish();
+        }else {
+            Toast.makeText(this,"Already added ",Toast.LENGTH_SHORT).show();
+        }
     }
 }
