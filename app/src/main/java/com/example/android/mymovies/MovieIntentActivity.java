@@ -9,11 +9,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -66,10 +66,10 @@ public class MovieIntentActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 Log.v("TAG","INserting ");
-                mDb = moviesDbHelper.getWritableDatabase();
+                //mDb = moviesDbHelper.getWritableDatabase();
                 HashMap<String, String> movieDet = (HashMap<String, String>) intentStarted.getSerializableExtra(Intent.EXTRA_TEXT);
                 addFavMovies(movieDet);
-                mDb.close();
+                //mDb.close();
                 Log.v("TAG","After INserting ");
             }
         });
@@ -106,14 +106,19 @@ public class MovieIntentActivity extends AppCompatActivity{
         }
     }
 
-    private long addFavMovies(HashMap<String,String> movieDet){
+    private void  addFavMovies(HashMap<String,String> movieDet){
         ContentValues cv = new ContentValues();
         cv.put(MovieDbContract.MovieDb.COLUMN_MOVIE_ID,movieDet.get("movie_id"));
         cv.put(MovieDbContract.MovieDb.COLUMN_MOVIE_NAME,movieDet.get("original_title"));
         cv.put(MovieDbContract.MovieDb.COLUMN_POSTER_ID,movieDet.get("poster_path"));
         cv.put(MovieDbContract.MovieDb.COLUMN_OVERVIEW,movieDet.get("overview"));
         cv.put(MovieDbContract.MovieDb.COLUMN_RELEASE_DATE,movieDet.get("release_date"));
-        return mDb.insert(MovieDbContract.MovieDb.TABLE_NAME, null, cv);
+        //return mDb.insert(MovieDbContract.MovieDb.TABLE_NAME, null, cv);
+        Uri uri = getContentResolver().insert(MovieDbContract.MovieDb.CONTENT_URI,cv);
+        if(uri != null){
+            Toast.makeText(this,uri.toString(),Toast.LENGTH_SHORT).show();
+        }
+        finish();
     }
 
 }

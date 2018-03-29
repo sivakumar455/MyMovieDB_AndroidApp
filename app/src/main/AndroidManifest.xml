@@ -3,6 +3,7 @@
     package="com.example.android.mymovies">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.example.android.mymovies.TERMS_READ" />
 
     <application
         android:allowBackup="true"
@@ -26,6 +27,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+
+        <provider
+            android:authorities="com.example.android.mymovies"
+            android:name="com.example.android.mymovies.MovieContentProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

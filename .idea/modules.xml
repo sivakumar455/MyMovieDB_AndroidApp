@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/MyMovieDB.iml" filepath="$PROJECT_DIR$/MyMovieDB.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/MyMovieDB__2.iml" filepath="$PROJECT_DIR$/.idea/MyMovieDB__2.iml" />
       <module fileurl="file://$PROJECT_DIR$/MyMovieDB__org.iml" filepath="$PROJECT_DIR$/MyMovieDB__org.iml" />
       <module fileurl="file://C:\Users\sipadala\AndroidStudioProjects\MyMovieDB\MyMovies.iml" filepath="C:\Users\sipadala\AndroidStudioProjects\MyMovieDB\MyMovies.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />

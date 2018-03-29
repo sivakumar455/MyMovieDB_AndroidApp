@@ -1,5 +1,6 @@
 package com.example.android.mymovies;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
@@ -7,7 +8,16 @@ import android.provider.BaseColumns;
  */
 
 public class MovieDbContract {
+
+    public static final String AUTHORITY = "com.example.android.mymovies";
+
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://"+AUTHORITY);
+
+    public static final String PATH_TASKS = "MovieDb";
+
     public static final class MovieDb implements BaseColumns{
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_TASKS).build();
 
         public static final String TABLE_NAME = "MovieDb";
         public static final String COLUMN_MOVIE_ID = "MovieId";
