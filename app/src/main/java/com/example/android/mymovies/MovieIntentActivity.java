@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,13 +34,20 @@ public class MovieIntentActivity extends AppCompatActivity{
     private SQLiteDatabase mDb;
     private TextView txtView;
     private LinearLayout rootView;
+    private ScrollView scrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_intent);
         String trStr = null;
+        if(savedInstanceState == null) {
+          detailMovie();
+        }
+    }
 
+    public void detailMovie(){
+        scrollView = findViewById(R.id.scroll_view);
         TextView title = findViewById(R.id.title);
         TextView overview = findViewById(R.id.overview);
         TextView release_date = findViewById(R.id.release_date);
@@ -52,15 +60,15 @@ public class MovieIntentActivity extends AppCompatActivity{
         txtView = new TextView(getApplicationContext());
         txtView.setText(getResources().getString(R.string.Trailers));
         txtView.setTextSize(24);
-        txtView.setPadding(12,5,0,0);
+        txtView.setPadding(12, 5, 0, 0);
         txtView.setTextColor(getResources().getColor(R.color.colorGreen));
         rootView.addView(txtView);
         final MoviesDbHelper moviesDbHelper = new MoviesDbHelper(getApplicationContext());
-        if (intentStarted.hasExtra(Intent.EXTRA_TEXT)){
-            HashMap<String,String> movieDet = (HashMap<String, String>) intentStarted.getSerializableExtra(Intent.EXTRA_TEXT);
+        if (intentStarted.hasExtra(Intent.EXTRA_TEXT)) {
+            HashMap<String, String> movieDet = (HashMap<String, String>) intentStarted.getSerializableExtra(Intent.EXTRA_TEXT);
 
             title.setText(movieDet.get("original_title"));
-            movieDet.put("poster","https://image.tmdb.org/t/p/w500/"+movieDet.get("poster_path"));
+            movieDet.put("poster", "https://image.tmdb.org/t/p/w500/" + movieDet.get("poster_path"));
             Picasso.with(getApplicationContext()).load(movieDet.get("poster")).placeholder(R.drawable.ic_launcher_background).into(poster);
             overview.setText(movieDet.get("overview"));
             release_date.setText(movieDet.get("release_date"));
@@ -68,14 +76,14 @@ public class MovieIntentActivity extends AppCompatActivity{
 
             String id = movieDet.get("movie_id");
             MyMovieAsyncTask mytask = new MyMovieAsyncTask();
-            mytask.execute("videos",id);
+            mytask.execute("videos", id);
             ReviewAsyncTask myReview = new ReviewAsyncTask();
-            myReview.execute("reviews",id);
+            myReview.execute("reviews", id);
         }
         fav.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.v("MovieIntentActivity","Inserting ");
+                Log.v("MovieIntentActivity", "Inserting ");
                 HashMap<String, String> movieDet = (HashMap<String, String>) intentStarted.getSerializableExtra(Intent.EXTRA_TEXT);
                 addFavMovies(movieDet);
             }
@@ -204,6 +212,29 @@ public class MovieIntentActivity extends AppCompatActivity{
             finish();
         }else {
             Toast.makeText(this,"Already added ",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        super.onSaveInstanceState(outState);
+        scrollView = findViewById(R.id.scroll_view);
+        outState.putIntArray("scroll_position",
+                new int[]{ scrollView.getScrollX(), scrollView.getScrollY()});
+        Log.v("CHK",String.valueOf(scrollView.getScrollX())+" "+String.valueOf(scrollView.getScrollY()));
+    }
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        detailMovie();
+        final int[] position = savedInstanceState.getIntArray("scroll_position");
+        Log.v("CHK",String.valueOf(position[0])+" "+String.valueOf(position[1]));
+        if(position != null) {
+            scrollView.postDelayed(new Runnable() {
+                public void run() {
+                    scrollView.scrollTo(position[0], position[1]);
+                }
+            },500);
         }
     }
 }

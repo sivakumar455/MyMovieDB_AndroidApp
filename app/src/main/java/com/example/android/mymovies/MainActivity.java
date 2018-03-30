@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -35,6 +36,7 @@ import java.util.HashMap;
         private static final String MY_PREFS_NAME = "myPref";
         private static final int MOVIE_FETCH_LOADER = 99;
         private SQLiteDatabase mDb;
+        private static Parcelable state;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +109,10 @@ import java.util.HashMap;
             MovieAdapter myMovieAdapter  = new MovieAdapter(getApplicationContext(),myArrList);
             myMovieGrid = findViewById(R.id.my_movie_grid);
             myMovieGrid.setAdapter(myMovieAdapter);
+            if(state != null) {
+                Log.d("MainAcitvity", "trying to restore gridview state..");
+                myMovieGrid.onRestoreInstanceState(state);
+            }
             //myMovieAdapter.getLayoutManager().onRestoreInstanceState(mSavedRecyclerLayoutState);
             myMovieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -156,6 +162,10 @@ import java.util.HashMap;
             MovieAdapter myMovieAdapter  = new MovieAdapter(getApplicationContext(), arrli);
             myMovieGrid = findViewById(R.id.my_movie_grid);
             myMovieGrid.setAdapter(myMovieAdapter);
+            if(state != null) {
+                Log.d("MainAcitvity", "trying to restore gridview state..");
+                myMovieGrid.onRestoreInstanceState(state);
+            }
             myMovieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -265,4 +275,12 @@ import java.util.HashMap;
         super.onSaveInstanceState(outState);
         //outState.putParcelable("LayoutKey", mLayoutManager.onSaveInstanceState());
     }
+
+    @Override
+    protected void onPause() {
+        Log.d("MainActivity", "saving gridview state @ onPause");
+        state = myMovieGrid.onSaveInstanceState();
+        super.onPause();
+    }
+
 }
