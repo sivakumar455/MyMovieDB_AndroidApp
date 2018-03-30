@@ -10,8 +10,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -33,7 +35,9 @@ public class MovieIntentActivity extends AppCompatActivity{
 
     private SQLiteDatabase mDb;
     private TextView txtView;
+    private ImageView thumbView;
     private LinearLayout rootView;
+    private LinearLayout reviewView;
     private ScrollView scrollView;
 
     @Override
@@ -44,6 +48,25 @@ public class MovieIntentActivity extends AppCompatActivity{
         if(savedInstanceState == null) {
           detailMovie();
         }
+        ScrollView parentScroll=findViewById(R.id.scroll_view);
+        HorizontalScrollView childScroll=findViewById(R.id.scroll_trailer);
+
+        parentScroll.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                Log.v("TEST","Parent Touch");
+                findViewById(R.id.scroll_trailer).getParent().requestDisallowInterceptTouchEvent(false);
+                return false;
+            }
+        });
+        childScroll.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                Log.v("TEST","Child Touch");
+                view.getParent().requestDisallowInterceptTouchEvent(true);
+                return false;
+            }
+        });
     }
 
     public void detailMovie(){
@@ -55,14 +78,12 @@ public class MovieIntentActivity extends AppCompatActivity{
         ImageView poster = findViewById(R.id.poster);
         final Intent intentStarted = getIntent();
         Button fav = findViewById(R.id.fav_button);
-        rootView = findViewById(R.id.main_view);
+        TextView trTxtView = findViewById(R.id.trailer_header);
+        TextView reviewTxtView = findViewById(R.id.review_header);
 
-        txtView = new TextView(getApplicationContext());
-        txtView.setText(getResources().getString(R.string.Trailers));
-        txtView.setTextSize(24);
-        txtView.setPadding(12, 5, 0, 0);
-        txtView.setTextColor(getResources().getColor(R.color.colorGreen));
-        rootView.addView(txtView);
+        rootView = findViewById(R.id.main_view);
+        reviewView = findViewById(R.id.review_view);
+
         final MoviesDbHelper moviesDbHelper = new MoviesDbHelper(getApplicationContext());
         if (intentStarted.hasExtra(Intent.EXTRA_TEXT)) {
             HashMap<String, String> movieDet = (HashMap<String, String>) intentStarted.getSerializableExtra(Intent.EXTRA_TEXT);
@@ -90,7 +111,7 @@ public class MovieIntentActivity extends AppCompatActivity{
         });
     }
 
-    private void setOnClick(final TextView imgbutton, final String myVid){
+    private void setOnClick(final ImageView imgbutton, final String myVid){
         imgbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -126,13 +147,16 @@ public class MovieIntentActivity extends AppCompatActivity{
                 ArrayList<String> myVid = myTrList.getTrailerList();
 
                 for(int idx =0; idx< myVid.size();idx++) {
-                    txtView = new TextView(getApplicationContext());
+                    thumbView = new ImageView(getApplicationContext());
                     int res = idx+1;
-                    txtView.setText(String.format("%s%d", getResources().getString(R.string.Trailer), res));
-                    txtView.setTextSize(20);
-                    txtView.setPadding(50,5,0,0);
-                    rootView.addView(txtView);
-                    setOnClick(txtView, myVid.get(idx));
+                    String img_url= "http://img.youtube.com/vi/"+myVid.get(idx)+"/0.jpg";
+                    Picasso.with(getApplicationContext())
+                            .load(img_url)
+                            .placeholder(R.drawable.ic_launcher_background)
+                            .into(thumbView);
+                    thumbView.setPadding(12,12,12,12);
+                    rootView.addView(thumbView);
+                    setOnClick(thumbView, myVid.get(idx));
                 }
             }
             super.onPostExecute(trStr);
@@ -154,20 +178,12 @@ public class MovieIntentActivity extends AppCompatActivity{
                 MovieDetails myReviewList = new MovieDetails(trStr);
                 ArrayList<String> myVid = myReviewList.getReviewList();
 
-                txtView = new TextView(getApplicationContext());
-                txtView.setText(getResources().getString(R.string.Reviews));
-                txtView.setTextSize(24);
-                txtView.setPadding(12,5,0,0);
-                txtView.setTextColor(getResources().getColor(R.color.colorGreen));
-                rootView.addView(txtView);
-
                 for(int idx =0; idx< myVid.size();idx++) {
                     txtView = new TextView(getApplicationContext());
                     txtView.setText(myVid.get(idx));
                     txtView.setTextSize(16);
                     txtView.setPadding(24,5,0,0);
-                    rootView.addView(txtView);
-                    //setOnClick(txtView, myVid.get(idx));
+                    reviewView.addView(txtView);
                 }
             }
             super.onPostExecute(trStr);
