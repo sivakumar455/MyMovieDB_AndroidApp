@@ -45,7 +45,7 @@ class MovieDetails {
             for (int idx=0; idx < resultArray.length();idx++) {
                 JSONObject newObj = resultArray.getJSONObject(idx);
                 id = newObj.getString("key");
-                arrli.add("https://www.youtube.com/watch?v="+id);
+                arrli.add(id);
             }
         }catch (Exception e){
             e.printStackTrace();

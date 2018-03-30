@@ -1,6 +1,7 @@
 package com.example.android.mymovies;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -26,23 +27,24 @@ import java.util.HashMap;
  */
 
     public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
-
         private GridView myMovieGrid;
         private final String TOP_RATED = "top_rated";
-
         private final String TOP_RATED_KEY = "top_rated";
-
+        private final String POPULAR = "popular";
+        private final String FAVOURITES = "favourites";
+        private static final String MY_PREFS_NAME = "myPref";
         private static final int MOVIE_FETCH_LOADER = 99;
-
         private SQLiteDatabase mDb;
+
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
 
-            dbFetch(TOP_RATED);
-            MoviesDbHelper moviesDbHelper = new MoviesDbHelper(this);
-            mDb = moviesDbHelper.getWritableDatabase();
+            SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+            String sortBy = prefs.getString("sortKey",TOP_RATED);
+            Log.v("SORT",sortBy);
+            dbFetch(sortBy);
         }
 
         @Override
@@ -105,6 +107,7 @@ import java.util.HashMap;
             MovieAdapter myMovieAdapter  = new MovieAdapter(getApplicationContext(),myArrList);
             myMovieGrid = findViewById(R.id.my_movie_grid);
             myMovieGrid.setAdapter(myMovieAdapter);
+            //myMovieAdapter.getLayoutManager().onRestoreInstanceState(mSavedRecyclerLayoutState);
             myMovieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -126,7 +129,6 @@ import java.util.HashMap;
             MoviesDbHelper moviesDbHelper = new MoviesDbHelper(this);
             mDb = moviesDbHelper.getReadableDatabase();
              try {
-
                  Cursor cursor =  getContentResolver().query(MovieDbContract.MovieDb.CONTENT_URI,
                          null,
                          null,
@@ -205,43 +207,62 @@ import java.util.HashMap;
 
         private void dbFetch(String order){
 
-            Bundle myBundle = new Bundle();
-            myBundle.putString(TOP_RATED_KEY,order);
+            if(!order.contains(FAVOURITES)) {
+                Bundle myBundle = new Bundle();
+                myBundle.putString(TOP_RATED_KEY, order);
 
-            LoaderManager loaderManager = getSupportLoaderManager();
-            Loader<String> movieDbLoader = loaderManager.getLoader(MOVIE_FETCH_LOADER);
+                LoaderManager loaderManager = getSupportLoaderManager();
+                Loader<String> movieDbLoader = loaderManager.getLoader(MOVIE_FETCH_LOADER);
 
-            if (movieDbLoader == null) {
-                Log.v("MainActivity","loader is null");
-                loaderManager.initLoader(MOVIE_FETCH_LOADER, myBundle, this);
-            } else {
-                Log.v("MainActivity","loader not null");
-                loaderManager.restartLoader(MOVIE_FETCH_LOADER, myBundle, this);
+                if (movieDbLoader == null) {
+                    Log.v("MainActivity", "loader is null");
+                    loaderManager.initLoader(MOVIE_FETCH_LOADER, myBundle, this);
+                } else {
+                    Log.v("MainActivity", "loader not null");
+                    loaderManager.restartLoader(MOVIE_FETCH_LOADER, myBundle, this);
+                }
             }
-
+            else{
+                Log.v("MainActivity","Favourite");
+                favList();
+            }
         }
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             myMovieGrid = findViewById(R.id.my_movie_grid);
+            SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+
             switch(item.getItemId()){
                 case R.id.top_rated_movie:
                     //Toast.makeText(getApplicationContext(),"Top Rated",Toast.LENGTH_SHORT).show();
                     dbFetch(TOP_RATED);
+                    editor.putString("sortKey",TOP_RATED );
+                    editor.commit();
                     return true;
                 case  R.id.popular_movie:
                     //Toast.makeText(getApplicationContext(),"Popular",Toast.LENGTH_SHORT).show();
-                    String POPULAR = "popular";
                     Log.v("MainActivity","Popular");
                     dbFetch(POPULAR);
+                    editor.putString("sortKey",POPULAR );
+                    editor.commit();
                     return true;
                 case R.id.favourite_movie:
                     Log.v("MainActivity","Favourite");
-                    favList();
+                    //favList();
+                    dbFetch(FAVOURITES);
+                    editor.putString("sortKey",FAVOURITES );
+                    editor.commit();
                     return true;
                 default:
                     Toast.makeText(getApplicationContext(),"Default",Toast.LENGTH_SHORT).show();
             }
             return super.onOptionsItemSelected(item);
         }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //outState.putParcelable("LayoutKey", mLayoutManager.onSaveInstanceState());
     }
+}

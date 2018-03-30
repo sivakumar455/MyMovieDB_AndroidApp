@@ -86,7 +86,17 @@ public class MovieIntentActivity extends AppCompatActivity{
         imgbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(myVid)));
+                //startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(myVid)));
+                Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:"+myVid));
+                Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + myVid));
+
+                if (appIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(appIntent);
+                }
+                else {
+                    startActivity(webIntent);
+                }
+
                 Log.v("MovieIntentActivity", "Video Playing....");
             }
         });
