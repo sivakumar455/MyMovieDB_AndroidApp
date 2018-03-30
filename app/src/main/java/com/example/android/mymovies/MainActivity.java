@@ -248,33 +248,27 @@ import java.util.HashMap;
                     //Toast.makeText(getApplicationContext(),"Top Rated",Toast.LENGTH_SHORT).show();
                     dbFetch(TOP_RATED);
                     editor.putString("sortKey",TOP_RATED );
-                    editor.commit();
+                    editor.apply();
                     return true;
                 case  R.id.popular_movie:
                     //Toast.makeText(getApplicationContext(),"Popular",Toast.LENGTH_SHORT).show();
                     Log.v("MainActivity","Popular");
                     dbFetch(POPULAR);
                     editor.putString("sortKey",POPULAR );
-                    editor.commit();
+                    editor.apply();
                     return true;
                 case R.id.favourite_movie:
                     Log.v("MainActivity","Favourite");
                     //favList();
                     dbFetch(FAVOURITES);
                     editor.putString("sortKey",FAVOURITES );
-                    editor.commit();
+                    editor.apply();
                     return true;
                 default:
                     Toast.makeText(getApplicationContext(),"Default",Toast.LENGTH_SHORT).show();
             }
             return super.onOptionsItemSelected(item);
         }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        //outState.putParcelable("LayoutKey", mLayoutManager.onSaveInstanceState());
-    }
 
     @Override
     protected void onPause() {
